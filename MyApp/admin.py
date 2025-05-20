@@ -1,28 +1,20 @@
-# myapp/admin.py
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User # Django's default User model
-
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from .models import CustomUser, CustomGroup
 
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ['first_name','username','phone_number','email']
+    search_fields = ['username']
+    list_filter = ['is_active']
+    ordering = ['first_name']
 
-class CustomUserInline(admin.StackedInline):
-    model = CustomUser
-    fields = ('phone_number',) 
-
-
-class CustomUserAdmin(BaseUserAdmin):
-    inlines = (CustomUserInline,)
-
-
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
-admin.site.register(CustomUser)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ['name','is_active','description']
+    list_filter = ['is_active']
+    ordering = ['name']
+    search_fields = ['name']
 
 
-#Register Group models
-class CustomGroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description')
-    search_fields = ('name', 'description')
-
-admin.site.register(CustomGroup, CustomGroupAdmin)
+admin.site.register(CustomUser,CustomUserAdmin)
+admin.site.register(CustomGroup,GroupAdmin)
