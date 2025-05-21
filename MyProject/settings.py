@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'MyApp', 
+    'rest_framework',
+    
 ]
 
 MIDDLEWARE = [
@@ -48,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'MyProject.urls'
@@ -68,6 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'MyProject.wsgi.application'
+
 
 
 # Database
@@ -122,5 +126,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#Added by me
-AUTH_USR_MODEL = 'MyApp.CustomUser'
+#added by me
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
