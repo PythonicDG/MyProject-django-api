@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'MyApp', 
-    'rest_framework',
+    'rest_framework',              #added by dipak
+    'rest_framework.authtoken',    #added by dipak for TokenAuthentication
     
 ]
 
@@ -126,7 +127,19 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#added by me
+#added by me ----------
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication'
+    ]
+}
+#when should i include above code.
+import datetime
+TOKEN_TTL = datetime.timedelta(seconds= 50)
+
