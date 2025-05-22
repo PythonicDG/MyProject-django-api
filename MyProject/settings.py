@@ -141,5 +141,5 @@ REST_FRAMEWORK = {
 }
 #when should i include above code.
 import datetime
-TOKEN_TTL = datetime.timedelta(seconds= 50)
+TOKEN_TTL = datetime.timedelta(seconds= 1000)
 

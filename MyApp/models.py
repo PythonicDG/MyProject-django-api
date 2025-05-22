@@ -7,10 +7,9 @@ from django.conf import settings
 from rest_framework.authtoken.models import Token 
 from django.utils import timezone
 from datetime import timedelta
+import datetime
 
-
-
-class CustomUser(User):
+class CustomUser(User): 
     phone_number = models.CharField(max_length=13, 
                     blank= False,null=True,
                      validators=[
@@ -31,21 +30,22 @@ class CustomGroup(Group):
     def __str__(self):
         return self.name
 
-# your_app/models.py
-from django.db import models
-from rest_framework.authtoken.models import Token
-from django.conf import settings
-import datetime
-
 class CustomToken(Token):
-    expiry_time = models.IntegerField(default=502)
+    expiry_time = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         verbose_name = "Custom Token"
         verbose_name_plural = "Custom Tokens"
 
+    def is_valid(self):
+        return self.expiry_time and self.expiry_time > timezone.now()
+
+    def save(self, *args, **kwargs):
+        if not self.expiry_time:
+            self.expiry_time = timezone.now() + timedelta(seconds=1000)
+        super().save(*args, **kwargs)
 
 
 
 
-   
 
