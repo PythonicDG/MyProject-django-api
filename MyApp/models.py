@@ -19,6 +19,8 @@ class CustomUser(User):
             )
         ]
     )
+    class Meta:
+        pass
 
     def __str__(self):
         return self.username
@@ -34,8 +36,7 @@ class CustomToken(Token):
     expiry_time = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        verbose_name = "Custom Token"
-        verbose_name_plural = "Custom Tokens"
+        pass
 
     def is_valid(self):
         return self.expiry_time and self.expiry_time > timezone.now()
@@ -45,6 +46,26 @@ class CustomToken(Token):
             self.expiry_time = timezone.now() + timedelta(seconds=1000)
         super().save(*args, **kwargs)
 
+class TempModel(models.Model):
+    username = models.CharField(blank=False, null=True, max_length=20)
+    password = models.CharField(blank=False, max_length=20)
+    email = models.CharField(blank=False, max_length=30)
+    otp = models.CharField(blank=True, null=True)
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=10)
+    created_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.username
+        
+    def expiry_time(self):
+        if self.otp and self.created_at:
+            self.expiry_time = self.created_at + timedelta(seconds = 120)
+            return self.expiry_time
+    
+
+    
 
 
 
