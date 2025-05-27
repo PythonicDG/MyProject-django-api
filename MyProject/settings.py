@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'MyApp.middleware.CustomTokenMiddleware',
     
 ]
 
@@ -136,7 +137,7 @@ AUTHENTICATION_BACKENDS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'MyApp.authentication.CustomTokenAuthentication',
+        #'MyApp.authentication.CustomTokenAuthentication',
     ]
 }
 

@@ -20,7 +20,7 @@ from .authentication import CustomTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST'])
-@authentication_classes([CustomTokenAuthentication])
+#@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def login_view(request):
     username = request.data.get('username')
@@ -60,7 +60,7 @@ def logout_view(request):
 
 
 @api_view(['GET'])
-@authentication_classes([CustomTokenAuthentication])
+#@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_user(request):
     user = request.user
@@ -76,7 +76,6 @@ def get_user(request):
     }
 
     return JsonResponse({"user": data})
-
 
 
 def send_mail(email,otp):
