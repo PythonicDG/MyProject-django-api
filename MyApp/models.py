@@ -47,21 +47,16 @@ class CustomToken(Token):
         super().save(*args, **kwargs)
 
 class TempModel(models.Model):
-    username = models.CharField(blank=False, null=True, max_length=20)
-    password = models.CharField(blank=False, max_length=20)
     email = models.CharField(blank=False, max_length=30)
     otp = models.CharField(blank=True, null=True)
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-    phone_number = models.CharField(max_length=10)
     created_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.username
+        return self.email
         
     def expiry_time(self):
         if self.otp and self.created_at:
-            self.expiry_time = self.created_at + timedelta(seconds = 120)
+            self.expiry_time = self.created_at + timedelta(seconds = 180)
             return self.expiry_time
     
 

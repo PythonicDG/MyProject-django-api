@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.utils import timezone
 from django.db import IntegrityError
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
@@ -12,8 +12,16 @@ import smtplib
 import random
 import json
 import datetime
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from django.utils import timezone
+from .models import CustomToken
+from .authentication import CustomTokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST'])
+@authentication_classes([CustomTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -42,7 +50,6 @@ def login_view(request):
             "Token": token.key
         })
 
-
     return JsonResponse({"message": "Login success", "user": user.username})
 
 
@@ -53,21 +60,23 @@ def logout_view(request):
 
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([CustomTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_user(request):
     user = request.user
-    auth_header = request.META.get('HTTP_AUTHORIZATION')
-
-    if auth_header is None:
-        return JsonResponse({"message": "Token not provided"})
-
-    token = get_object_or_404(CustomToken, user=user)
-    now = timezone.now()
     
-    if token.expiry_time < now:
-        return JsonResponse({"message": "Token has expired, please log in again"})
+    if not user.is_authenticated:
+        return JsonResponse({"message": "Unauthorized: Invalid or missing token"})
 
-    return JsonResponse({"username": user.username})
+    data = {
+        "username": user.username,
+        "First Name": user.first_name,
+        "Last Name": user.last_name,
+        "Email": user.email
+    }
+
+    return JsonResponse({"user": data})
+
 
 
 def send_mail(email,otp):
@@ -83,96 +92,205 @@ def send_mail(email,otp):
         except Exception as e:
             return JsonResponse({"message": e})
 
+
 @api_view(['POST'])
-def registration(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+def register_email(request):
     email = request.data.get('email')
-    first_name = request.data.get('first_name')
-    last_name = request.data.get('last_name')
+    if not email:
+        return JsonResponse({'message': 'Email is required'})
+
     otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
-    phone_number = request.data.get('phone_number')
-
-    if TempModel.objects.filter(username=username).exists():
-            instance = TempModel.objects.get(username=username)
-            instance.password = password
-            instance.email = email
-            instance.otp = otp
-            instance.first_name = first_name
-            instance.save()
-
-            send_mail(email, otp)
-
-            return JsonResponse({"message": "User Alredy Exist","Action": "OTP send Successfully"})
     created_at = timezone.now()
 
-    temp_model_instance = TempModel(
-                    username = username, 
-                    password = password, 
-                    otp = otp,
-                    email = email, 
-                    first_name = first_name, 
-                    last_name = last_name,
-                    phone_number = phone_number,
-                    created_at = created_at
-                    )
-    temp_model_instance.save()
+    TempModel.objects.update_or_create(
+        email=email,
+        defaults={'otp': otp, 'created_at': created_at}
+    )
 
-    send_mail(email,otp)
+    send_mail(email, otp)
+    return JsonResponse({'message': 'OTP sent successfully'})
 
-    return JsonResponse({'username': 'Data saved Successfully'})
 
 @api_view(['POST'])
 def verify_otp(request):
-    data = json.loads(request.body)
-    email = data.get('email')
-    otp = data.get('otp')
-    
+    email = request.data.get('email')
+    otp = request.data.get('otp')
+
     try:
         user = TempModel.objects.get(email=email)
+    except TempModel.DoesNotExist:
+        return JsonResponse({'message': 'Invalid email'})
 
-    except TempModel.DoesNotExist as e:
-        return JsonResponse({"message":"wrong email provided"})
+    expiry_time = user.created_at + timezone.timedelta(minutes=10)
+    if expiry_time < timezone.now():
+        return JsonResponse({'message': 'OTP expired'})
 
-    expiry_ = user.expiry_time()
+    if user.otp != otp:
+        return JsonResponse({'message': 'Invalid OTP'})
+
+    return JsonResponse({'message': 'OTP verified'})
+
+
+@api_view(['POST'])
+def registration(request):
+    data = json.loads(request.body)
+
+    username = data.get('username')
+    password = data.get('password')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    phone_number = data.get('phone_number')
+    email = data.get('email')
+
+    if CustomUser.objects.filter(email=email).exists():
+        return JsonResponse({'message': 'Email already exists'})
+
+    try:
+        TempModel.objects.get(email=email)
+    except TempModel.DoesNotExist:
+        return JsonResponse({'message': 'Email not verified'})
+
+    user = CustomUser(
+        username=username,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        phone_number=phone_number
+    )
+    user.set_password(password)
+    user.save()
+
+    return JsonResponse({'message': 'Registration successful'})
+
+#26-05-2025
+
+def fetch_groups(request):
+    if request.method == 'GET':
+        group_id = request.GET.get('group_id')
+        group_name = request.GET.get('group_name')
+        search = request.GET.get('search')
+        filter_by = request.GET.get('filter_by')
+        get_users = request.GET.get('get_users')
+
+        if group_id:    
+            try:
+                groups = Group.objects.get(id=group_id)
+
+                users = User.objects.filter(groups=groups)
+
+                data = []
+
+                for i in users:
+                    data.append(i.username)
+
+                return JsonResponse({"group name": groups.name, 'users': data})
+
+            except Group.DoesNotExist:
+                return JsonResponse({"message":"Group ID does not exist"})
+
+        elif search:
+            try:
+                user = User.objects.get(username=search)
+
+                data = {
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email
+                }
+
+                return JsonResponse({"Username":user.username,"Data":data})
+            
+            except User.DoesNotExist:
+                return JsonResponse({"Message":"User Does Not Exist"})
+
+        elif filter_by:
+            users = User.objects.filter(is_active=filter_by)
+
+            data =[
+                {
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email
+                }
+                for user in users
+            ]
+
+            return JsonResponse({"users":data})
+        
+        else:
+            groups = Group.objects.all()
+
+            data = [
+                {
+                    'id': group.id,
+                    'name': group.name,
+                    'users': list(User.objects.filter(groups=group).values('username','first_name','last_name'))
+                }
+                for group in groups
+            ]
+
+            return JsonResponse(data, safe=False)
+
+@api_view(['DELETE'])
+def delete_user(request,username):
+    try:
+        user = User.objects.get(username=username)
+        user.delete()
+        
+        return JsonResponse({"User Deleted Successfully":username})
     
-    if expiry_ < timezone.now():
-        return JsonResponse({"message": "OTP is expired", "Action": "Please register again"})
+    except User.DoesNotExist:
+        return JsonResponse({"error":"User Does Not Exist"})    
 
-    if otp == user.otp:
-        if CustomUser.objects.filter(username=user.username):
-
-            return JsonResponse({"message": "email already Exists"})
-
-        custom_user_model = CustomUser(
-            username = user.username,
-            first_name = user.first_name,
-            last_name = user.last_name,
-            phone_number = user.phone_number,
-            email = user.email
-        )
-        custom_user_model.set_password(user.password)
-        custom_user_model.save()
-
-        return JsonResponse({"message": "Email Verified Successfully", 'email': email})
-
-    return JsonResponse({"message": "Wrong OTP", 'email': email})
-    
 @api_view(['GET'])
-def get_group_info(request):
-    groups = Group.objects.all()
-    type_groups = type(groups)
+def get_users(request):
+    users = User.objects.all()
+
+    users_list = []
     
-    for group in groups:
-        users = group.user_set.all()
+    for user in users:
+        users_list.append(user.first_name)
 
-        group_data = {
-            "Group name": group.name,
-            "users": list(users.values('id','username'))
-        }
+    users_list.sort()
 
-    return JsonResponse({"data":group_data})
+    return JsonResponse({"List of Users sorted by Alphabetical Order":users_list})
 
 
+@api_view(['PUT'])
+def update_user(request, username):
+    try:
+        user = User.objects.get(username=username)
+
+    except User.DoesNotExist:
+        return JsonResponse({"message":"User not found"})
+    
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+        except Exception as e:
+            return JsonResponse({"Error":e})
+
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        phone_number = data.get('phone_number')
+
+        if first_name:
+            user.first_name = first_name
+            user.save()
+        
+        if last_name:
+            user.last_name = last_name
+            user.save()
+
+        if phone_number:
+            usre.phone_number = phone_number
+            user.save()
+        
+        return JsonResponse({"message":"data updated succesfully"})
+    
+    return JsonResponse({"message":"data updatation is failed"})
 
 
+        
+    

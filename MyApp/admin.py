@@ -5,7 +5,7 @@ from .models import CustomUser, CustomGroup, CustomToken, TempModel
 
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['first_name','username','phone_number','email']
-    search_fields = ['username']
+    search_fields = ['groups']
     list_filter = ['is_active', 'groups']
     ordering = ['first_name']
 
@@ -27,7 +27,6 @@ class TempAdmin(admin.ModelAdmin):
     list_display = (
         'email',
         'otp',
-        'username',
         'created_at',
         'expiry_time',
     )

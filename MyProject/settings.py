@@ -136,9 +136,10 @@ AUTHENTICATION_BACKENDS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication'
+        'MyApp.authentication.CustomTokenAuthentication',
     ]
 }
+
 #when should i include above code.
 import datetime
 TOKEN_TTL = datetime.timedelta(seconds= 1000)
