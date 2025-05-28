@@ -296,69 +296,81 @@ def update_user(request, username):
 
 
 #Cart
+def cart_to_dict(cart):
+    return {
+        "id": cart.id,
+        "name": cart.name,
+        "price": cart.price,
+    }
+
 class CartListCreateAPIView(APIView):
     def get(self, request):
-        Carts = Cart.objects.all()
+        carts = Cart.objects.all()
 
-        category_id = request.GET.get("category")
-        sort = request.GET.get("sort")
+        data = []
+        
+        for i in carts:
+            data.append(cart_to_dict(i))
 
-        serializer = CartSerializer(Carts, many=True)
-
-        return Response(serializer.data)
+        return Response(data)
 
     def post(self, request):
-        serializer = CartSerializer(data=request.data)
+        data = request.data
 
-        if serializer.is_valid():
-            serializer.save()
+        try:
+            cart = Cart.objects.create(
+                name=data["name"],
+                price=data["price"],
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(cart_to_dict(cart), status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CartDetailAPIView(APIView):
     def get_object(self, id):
         try:
             return Cart.objects.get(id=id)
-
         except Cart.DoesNotExist:
             return None
 
     def get(self, request, id):
-        Cart = self.get_object(id)
-
-        if not Cart: 
+        cart = self.get_object(id)
+        if not cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-            
-        serializer = CartSerializer(Cart)
-        
-        return Response(serializer.data)
+        return Response(cart_to_dict(cart))
 
     def put(self, request, id):
-        Cart = self.get_object(id)
-
-        if not Cart:
+        cart = self.get_object(id)
+        if not cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = CartSerializer(Cart, data=request.data)
+        data = request.data
 
-        if serializer.is_valid():
-            serializer.save()
-            
-            return Response(serializer.data)
+        if "name" in data:
+            cart.name = data["name"]
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if "price" in data:
+            cart.price = data["price"]
+
+        try:
+            cart.save()
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(cart_to_dict(cart))
 
     def delete(self, request, id):
-        Cart = self.get_object(id)
+        cart = self.get_object(id)
 
-        if not Cart:
+        if not cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        Cart.delete()
+        cart.delete()
+        return Response("Item deleted successfully",status=status.HTTP_204_NO_CONTENT)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 #CRUD operations using Model View Set
