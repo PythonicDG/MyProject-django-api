@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser
+from .models import CustomToken, TempModel, CustomUser, Category, Product
 import smtplib
 import random
 import json
@@ -16,41 +16,48 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
 from .models import CustomToken
-from .authentication import CustomTokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Category, Product
+from .serializers import CategorySerializer, ProductSerializer
 
 @api_view(['POST'])
-#@authentication_classes([CustomTokenAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
     user = authenticate(request, username=username, password=password)
     if user is None:
-        return JsonResponse({"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({"message": "Invalid credentials"}, status=401)
 
     login(request, user)
 
-    try:
-        token, created = CustomToken.objects.get_or_create(user=user)
-    except IntegrityError:
-        token = CustomToken.objects.get(user=user)
-        created = False
-
     now = timezone.now()
+    token = CustomToken.objects.filter(user=user).first()
+    
+    if token:
+        if not token.is_valid():
+            token.delete()
+            token = CustomToken.objects.create(user=user)
+            return JsonResponse({
+                "message": "Token has been expired, New Token is generated",
+                "token": token.key,
+                "user": user.username
+            })
 
-    if not created and (not token.expiry_time or token.expiry_time < now):
-        token.delete()
+    if not token:
         token = CustomToken.objects.create(user=user)
-        token.save()
-        return JsonResponse({
-            "message": "Token has expired",
-            "action": "New token generated",
-            "Token": token.key
-        })
 
-    return JsonResponse({"message": "Login success", "user": user.username})
+    return JsonResponse({
+        "message": "Login successful",
+        "token": token.key,
+        "user": user.username
+    })
+
 
 
 @api_view(['POST'])
@@ -59,24 +66,20 @@ def logout_view(request):
     return JsonResponse({"message": "Logout success"})
 
 
+
 @api_view(['GET'])
-#@authentication_classes([CustomTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_user(request):
-    user = request.user
-    
-    if not user.is_authenticated:
-        return JsonResponse({"message": "Unauthorized: Invalid or missing token"})
+    user = request.user  
 
     data = {
         "username": user.username,
-        "First Name": user.first_name,
-        "Last Name": user.last_name,
-        "Email": user.email
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email
     }
 
     return JsonResponse({"user": data})
-
 
 def send_mail(email,otp):
     if email and otp:
@@ -91,8 +94,8 @@ def send_mail(email,otp):
         except Exception as e:
             return JsonResponse({"message": e})
 
-
 @api_view(['POST'])
+@permission_classes([])
 def register_email(request):
     email = request.data.get('email')
     if not email:
@@ -111,6 +114,7 @@ def register_email(request):
 
 
 @api_view(['POST'])
+@permission_classes([])
 def verify_otp(request):
     email = request.data.get('email')
     otp = request.data.get('otp')
@@ -290,6 +294,98 @@ def update_user(request, username):
     
     return JsonResponse({"message":"data updatation is failed"})
 
+#Category
+class CategoryListCreateAPIView(APIView):
+    def get(self, request):
+        categories = Category.objects.all()
 
+        serializer = CategorySerializer(categories, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = CategorySerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+#Product
+class ProductListCreateAPIView(APIView):
+    def get(self, request):
+        products = Product.objects.all()
+
+        category_id = request.GET.get("category")
+        sort = request.GET.get("sort")
+
+        if category_id:
+            products  = products.filter(categories=category_id)  
+
+        if sort:
+            if sort=='name':
+                products = products.order_by('name')
+            elif sort=='-name':
+                products = products.order_by('-name')
         
-    
+
+        serializer = ProductSerializer(products, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ProductSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ProductDetailAPIView(APIView):
+    def get_object(self, id):
+        try:
+            return Product.objects.get(id=id)
+
+        except Product.DoesNotExist:
+            return None
+
+    def get(self, request, id):
+        product = self.get_object(id)
+
+        if not product: 
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            
+        serializer = ProductSerializer(product)
+        
+        return Response(serializer.data)
+
+    def put(self, request, id):
+        product = self.get_object(id)
+
+        if not product:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ProductSerializer(product, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        product = self.get_object(id)
+
+        if not product:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        product.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

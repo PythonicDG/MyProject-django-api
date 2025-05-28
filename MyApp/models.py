@@ -58,6 +58,23 @@ class TempModel(models.Model):
         if self.otp and self.created_at:
             self.expiry_time = self.created_at + timedelta(seconds = 180)
             return self.expiry_time
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.IntegerField()
+    categories = models.ManyToManyField(Category, related_name= 'products')
+
+    def __str__(self):
+        return self.name
+
+
     
 
     

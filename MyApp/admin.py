@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import CustomUser, CustomGroup, CustomToken, TempModel
+from .models import CustomUser, CustomGroup, CustomToken, TempModel, Product, Category
 
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['first_name','username','phone_number','email']
@@ -33,7 +33,24 @@ class TempAdmin(admin.ModelAdmin):
     list_filter = ['email']
     search_fields = ['email']
 
+class CategoryAdmin(admin.ModelAdmin):
+    list_display=(
+        'id',
+        'name'
+    )
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'price'
+    )
+    list_filter = ['name']
+    search_fields = ['name']
+
 admin.site.register(CustomToken, TokenAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(CustomGroup, GroupAdmin)
 admin.site.register(TempModel, TempAdmin)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Product, ProductAdmin)
