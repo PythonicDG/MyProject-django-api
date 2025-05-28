@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser, Product
+from .models import CustomToken, TempModel, CustomUser, Cart
 import smtplib
 import random
 import json
@@ -21,8 +21,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Cart
+from .serializers import CartSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -295,20 +295,20 @@ def update_user(request, username):
     return JsonResponse({"message":"data updatation is failed"})
 
 
-#Product
-class ProductListCreateAPIView(APIView):
+#Cart
+class CartListCreateAPIView(APIView):
     def get(self, request):
-        products = Product.objects.all()
+        Carts = Cart.objects.all()
 
         category_id = request.GET.get("category")
         sort = request.GET.get("sort")
 
-        serializer = ProductSerializer(products, many=True)
+        serializer = CartSerializer(Carts, many=True)
 
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = ProductSerializer(data=request.data)
+        serializer = CartSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -317,31 +317,31 @@ class ProductListCreateAPIView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ProductDetailAPIView(APIView):
+class CartDetailAPIView(APIView):
     def get_object(self, id):
         try:
-            return Product.objects.get(id=id)
+            return Cart.objects.get(id=id)
 
-        except Product.DoesNotExist:
+        except Cart.DoesNotExist:
             return None
 
     def get(self, request, id):
-        product = self.get_object(id)
+        Cart = self.get_object(id)
 
-        if not product: 
+        if not Cart: 
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
             
-        serializer = ProductSerializer(product)
+        serializer = CartSerializer(Cart)
         
         return Response(serializer.data)
 
     def put(self, request, id):
-        product = self.get_object(id)
+        Cart = self.get_object(id)
 
-        if not product:
+        if not Cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ProductSerializer(product, data=request.data)
+        serializer = CartSerializer(Cart, data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -351,12 +351,12 @@ class ProductDetailAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
-        product = self.get_object(id)
+        Cart = self.get_object(id)
 
-        if not product:
+        if not Cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        product.delete()
+        Cart.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -59,18 +59,10 @@ class TempModel(models.Model):
             self.expiry_time = self.created_at + timedelta(seconds = 180)
             return self.expiry_time
 
-class Product(models.Model):
+class Cart(models.Model):
     name = models.CharField(max_length=100)
     price = models.IntegerField()
 
     def __str__(self):
         return self.name
-
-
-    
-
-    
-
-
-
 
