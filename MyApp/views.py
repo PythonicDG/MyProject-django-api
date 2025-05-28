@@ -313,8 +313,6 @@ class CategoryListCreateAPIView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
 #Product
 class ProductListCreateAPIView(APIView):
     def get(self, request):
@@ -331,7 +329,6 @@ class ProductListCreateAPIView(APIView):
                 products = products.order_by('name')
             elif sort=='-name':
                 products = products.order_by('-name')
-        
 
         serializer = ProductSerializer(products, many=True)
 
