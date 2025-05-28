@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser, Category, Product
+from .models import CustomToken, TempModel, CustomUser, Product
 import smtplib
 import random
 import json
@@ -21,8 +21,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer
+from .models import Product
+from .serializers import ProductSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -294,24 +294,6 @@ def update_user(request, username):
     
     return JsonResponse({"message":"data updatation is failed"})
 
-#Category
-class CategoryListCreateAPIView(APIView):
-    def get(self, request):
-        categories = Category.objects.all()
-
-        serializer = CategorySerializer(categories, many=True)
-
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = CategorySerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #Product
 class ProductListCreateAPIView(APIView):
@@ -320,15 +302,6 @@ class ProductListCreateAPIView(APIView):
 
         category_id = request.GET.get("category")
         sort = request.GET.get("sort")
-
-        if category_id:
-            products  = products.filter(categories=category_id)  
-
-        if sort:
-            if sort=='name':
-                products = products.order_by('name')
-            elif sort=='-name':
-                products = products.order_by('-name')
 
         serializer = ProductSerializer(products, many=True)
 
@@ -386,3 +359,6 @@ class ProductDetailAPIView(APIView):
         product.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+#CRUD operations using Model View Set

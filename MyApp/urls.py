@@ -15,7 +15,6 @@ urlpatterns = [
     path('update_user/<str:username>/', views.update_user, name='update_user'),
 
     #class based
-    path('categories/', views.CategoryListCreateAPIView.as_view()),
     path('products/', views.ProductListCreateAPIView.as_view()),
     path('products/<int:id>/', views.ProductDetailAPIView.as_view()),
 ]
