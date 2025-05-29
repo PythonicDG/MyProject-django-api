@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Cart
+from .models import Cart, Category, Product
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -7,3 +7,17 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
 
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+class ProductSerializer(serializers.ModelSerializer):
+    categories = serializers.PrimaryKeyRelatedField(
+        queryset = Category.objects.all(), many=True
+    )
+
+    class Meta:
+        model = Product
+        fields = '__all__'

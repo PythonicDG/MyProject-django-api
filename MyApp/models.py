@@ -66,3 +66,17 @@ class Cart(models.Model):
     def __str__(self):
         return self.name
 
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    categories = models.ManyToManyField(Category, related_name='products')
+
+    def __str__(self):
+        return self.name
+        
+

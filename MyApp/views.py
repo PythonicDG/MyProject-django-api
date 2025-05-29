@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser, Cart
+from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category
 import smtplib
 import random
 import json
@@ -22,7 +22,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Cart
-from .serializers import CartSerializer
+from .serializers import CartSerializer, CategorySerializer, ProductSerializer
+from rest_framework import viewsets, filters
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -287,7 +289,7 @@ def update_user(request, username):
             user.save()
 
         if phone_number:
-            usre.phone_number = phone_number
+            user.phone_number = phone_number
             user.save()
         
         return JsonResponse({"message":"data updated succesfully"})
@@ -374,3 +376,25 @@ class CartDetailAPIView(APIView):
 
 
 #CRUD operations using Model View Set
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+    search_fields = ['name']
+
+    ordering_fields = ['name']
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+
+        category_id = self.request.query_params.get('category')
+        if category_id:
+            queryset = queryset.filter(categories__id=category_id)
+
+        return queryset
