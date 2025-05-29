@@ -7,3 +7,6 @@ def deactivate_products(sender, instance, **kwargs):
     if not instance.is_active:
         products = Product.objects.filter(categories=instance)
         products.update(is_active=False)
+    
+
+
