@@ -334,17 +334,21 @@ class CartDetailAPIView(APIView):
     def get_object(self, id):
         try:
             return Cart.objects.get(id=id)
+
         except Cart.DoesNotExist:
             return None
 
     def get(self, request, id):
         cart = self.get_object(id)
+
         if not cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
         return Response(cart_to_dict(cart))
 
     def put(self, request, id):
         cart = self.get_object(id)
+
         if not cart:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -374,16 +378,18 @@ class CartDetailAPIView(APIView):
         return Response("Item deleted successfully",status=status.HTTP_204_NO_CONTENT)
 
 
-
 #CRUD operations using Model View Set
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
+
     serializer_class = CategorySerializer
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
+    
     serializer_class = ProductSerializer
+
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
     search_fields = ['name']
@@ -394,6 +400,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         queryset = Product.objects.all()
 
         category_id = self.request.query_params.get('category')
+
         if category_id:
             queryset = queryset.filter(categories__id=category_id)
 
