@@ -68,6 +68,8 @@ class Cart(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+
 
     def __str__(self):
         return self.name
@@ -75,6 +77,8 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=100)
     categories = models.ManyToManyField(Category, related_name='products')
+    is_active = models.BooleanField(default=True,)
+
 
     def __str__(self):
         return self.name
