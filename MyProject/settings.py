@@ -56,11 +56,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'MyProject.urls'
+import os
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'MyApp', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -151,4 +152,6 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'dipakgaikwadms@gmail.com'
 EMAIL_HOST_PASSWORD = 'epfgkbrqivwyxsbc'
+
+
 

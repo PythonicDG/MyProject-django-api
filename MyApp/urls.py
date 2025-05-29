@@ -25,5 +25,6 @@ urlpatterns = [
     path('cart/', views.CartListCreateAPIView.as_view()),
     path('cart/<int:id>/', views.CartDetailAPIView.as_view()),
     
-    path('',include(router.urls))
+    path('',include(router.urls)),
+    path('testing/', views.preview_email, name='preview_email')
 ]

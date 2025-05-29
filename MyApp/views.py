@@ -11,7 +11,7 @@ from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category
 import smtplib
 import random
 import json
-import datetime
+from datetime import datetime
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
@@ -24,7 +24,12 @@ from rest_framework import status
 from .models import Cart
 from .serializers import CartSerializer, CategorySerializer, ProductSerializer
 from rest_framework import viewsets, filters
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
+from django.shortcuts import render
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -83,15 +88,30 @@ def get_user(request):
 
     return JsonResponse({"user": data})
 
-def send_mail(email,otp):
+
+
+def send_email(email,otp):
     if email and otp:
         try:
-            s = smtplib.SMTP('smtp.gmail.com', 587)
-            s.starttls()
-            s.login('dipakgaikwadms@gmail.com', 'epfgkbrqivwyxsbc')
-            s.sendmail('dipakgaikwadmg@gmail.com',email,otp)
-            s.quit()
-            print("Success")
+            context = {
+                "name":"User",
+                "otp":otp,
+                "year":datetime.now().year
+            }
+
+            html_message = render_to_string('emails/email_template.html',context)
+            plain_message = strip_tags(html_message)
+
+            send_mail(
+                subject="Your OTP Code",
+                message=plain_message,
+                html_message=html_message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False
+            )
+
+            return JsonResponse({"message":"OTP sent successfully"})
 
         except Exception as e:
             return JsonResponse({"message": e})
@@ -111,7 +131,7 @@ def register_email(request):
         defaults={'otp': otp, 'created_at': created_at}
     )
 
-    send_mail(email, otp)
+    send_email(email, otp)
     return JsonResponse({'message': 'OTP sent successfully'})
 
 
@@ -297,7 +317,7 @@ def update_user(request, username):
     return JsonResponse({"message":"data updatation is failed"})
 
 
-#Cart
+#Cart Class Based Views
 def cart_to_dict(cart):
     return {
         "id": cart.id,
@@ -405,3 +425,15 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(categories__id=category_id)
 
         return queryset
+
+
+
+#testing the template
+
+def preview_email(request):
+    context = {
+        "name": "Dipak",
+        "otp": "123456",
+        "year": datetime.now().year
+    }
+    return render(request, 'emails/email_template.html', context)
