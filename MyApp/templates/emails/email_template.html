@@ -28,6 +28,13 @@
             border-radius: 8px 8px 0 0;
         }
 
+        .header img {
+            width: 100px; /* Adjust size */
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto; /* Center the image */
+        }
+
         .content {
             padding: 20px;
             font-size: 16px;
@@ -49,11 +56,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
-                <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
-                alt="Google Logo" width="100" style="display:block; margin: 0 auto 10px;">
+            <img src="{{ img }}" alt="Search Image" />
             <h2>Your OTP Code</h2>
         </div>
         <div class="content">

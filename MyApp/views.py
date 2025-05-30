@@ -24,12 +24,25 @@ from rest_framework import status
 from .models import Cart
 from .serializers import CartSerializer, CategorySerializer, ProductSerializer
 from rest_framework import viewsets, filters
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from django.shortcuts import render
+from .authentication import CustomTokenAuthentication
+import threading
+from django.contrib.sites.shortcuts import get_current_site
+import os
+import base64
+from django.templatetags.static import static
+
+
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from email.mime.image import MIMEImage
+from datetime import datetime
+import os
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -66,16 +79,15 @@ def login_view(request):
     })
 
 
-
 @api_view(['POST'])
-def logout_view(request):
+def logout_view(request):   
     logout(request)
     return JsonResponse({"message": "Logout success"})
 
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@authentication_classes([CustomTokenAuthentication])
 def get_user(request):
     user = request.user  
 
@@ -88,8 +100,7 @@ def get_user(request):
 
     return JsonResponse({"user": data})
 
-
-
+#send_mail
 def send_email(email,otp):
     if email and otp:
         try:
@@ -100,11 +111,9 @@ def send_email(email,otp):
             }
 
             html_message = render_to_string('emails/email_template.html',context)
-            plain_message = strip_tags(html_message)
 
             send_mail(
                 subject="Your OTP Code",
-                message=plain_message,
                 html_message=html_message,
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[email],
@@ -115,6 +124,73 @@ def send_email(email,otp):
 
         except Exception as e:
             return JsonResponse({"message": e})
+
+#EmailMessage
+def send_mail_class(email,otp,image_url):
+    if email and otp:
+        try:
+            context = {
+                "name": "User",
+                "otp": otp,
+                "year": datetime.now().year,
+                "img": image_url
+            }
+            print(image_url)
+            html_message = render_to_string('emails/email_template.html',context)
+
+            mail = EmailMessage(
+                subject = "Your OTP Message",
+                from_email = settings.EMAIL_HOST_USER,
+                to = [email]
+            )
+            mail.content_subtype = 'html'
+            mail.body = html_message
+            mail.send()
+            print("Congradulations")
+            return JsonResponse({"message":"OTP send Successfully"})
+
+        
+        
+        except Exception as e:
+            return JsonResponse({"error":"error"})
+
+#EmailMultiAlternatives
+def send_email_alt(email, otp):
+    context = {
+        "name": "User",
+        "otp": otp,
+        "year": datetime.now().year,
+        "img": "cid:search_image"  
+    }
+
+    html_message = render_to_string('emails/email_template.html', context)
+
+    email_msg = EmailMultiAlternatives(
+        subject="Your OTP Code",
+        body="", 
+        from_email= settings.EMAIL_HOST_USER,  # replace with settings.EMAIL_HOST_USER if you want
+        to=[email],
+    )
+
+    email_msg.attach_alternative(html_message, "text/html")
+
+    image_path = r'C:\Users\dipak\Desktop\Company_work\Project1\MyProject\MyApp\search.png'  
+    with open(image_path, 'rb') as img_file:
+        mime_image = MIMEImage(img_file.read())
+        mime_image.add_header('Content-ID', '<search_image>')  # must match context img
+        mime_image.add_header('Content-Disposition', 'inline', filename='search.png')
+        email_msg.attach(mime_image)
+
+    email_msg.send()
+
+
+#sending mail using thread
+def send_mail_thread(email,otp):
+    print("inside the threaidng")
+    thread = threading.Thread(target=send_email_alt, args=(email,otp))
+    thread.start()
+
+
 
 @api_view(['POST'])
 @permission_classes([])
@@ -130,8 +206,9 @@ def register_email(request):
         email=email,
         defaults={'otp': otp, 'created_at': created_at}
     )
-
-    send_email(email, otp)
+    image_url = request.build_absolute_uri(static('images/search.png'))
+    
+    send_mail_thread(email, otp)
     return JsonResponse({'message': 'OTP sent successfully'})
 
 
@@ -143,10 +220,12 @@ def verify_otp(request):
 
     try:
         user = TempModel.objects.get(email=email)
+
     except TempModel.DoesNotExist:
         return JsonResponse({'message': 'Invalid email'})
 
     expiry_time = user.created_at + timezone.timedelta(minutes=10)
+
     if expiry_time < timezone.now():
         return JsonResponse({'message': 'OTP expired'})
 
@@ -172,6 +251,7 @@ def registration(request):
 
     try:
         TempModel.objects.get(email=email)
+        
     except TempModel.DoesNotExist:
         return JsonResponse({'message': 'Email not verified'})
 
@@ -329,6 +409,8 @@ class CartListCreateAPIView(APIView):
     def get(self, request):
         carts = Cart.objects.all()
 
+        filter_backends = [filters.SearchFilter]
+        search_fields = ['name']
         data = []
         
         for i in carts:
@@ -437,3 +519,6 @@ def preview_email(request):
         "year": datetime.now().year
     }
     return render(request, 'emails/email_template.html', context)
+
+
+#Order and Payment

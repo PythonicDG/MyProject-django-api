@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -50,8 +51,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'MyApp.middleware.CustomTokenMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
     
 ]
 
@@ -155,3 +155,7 @@ EMAIL_HOST_PASSWORD = 'epfgkbrqivwyxsbc'
 
 
 
+import os
+STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'mystaticfiles'),
+    ]
