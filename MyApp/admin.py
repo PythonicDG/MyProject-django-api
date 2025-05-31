@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import CustomUser, CustomGroup, CustomToken, TempModel, Cart, Category, Product
+from .models import CustomUser, CustomGroup, CustomToken, TempModel, Cart, Category, Product, Customer, Payment, Order
 
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['first_name','username','phone_number','email']
@@ -61,3 +61,6 @@ admin.site.register(TempModel, TempAdmin)
 admin.site.register(Cart, CartAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(Order)
+admin.site.register(Payment)
+admin.site.register(Customer)
