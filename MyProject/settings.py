@@ -159,3 +159,4 @@ import os
 STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'mystaticfiles'),
     ]
+SITE_ID = 1

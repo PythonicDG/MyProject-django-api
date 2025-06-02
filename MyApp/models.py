@@ -82,35 +82,35 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-        
-
-class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    product_name = models.CharField(max_length=255)
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, default='Pending')  # Pending, Paid, etc.
+    customer_name = models.CharField(max_length=100)
+    customer_email = models.EmailField()
+    STATUS_CHOICES = [
+        ('pending','Pending'),
+        ('preparing', 'Preparing'),
+        ('served', 'Served'),
+        ('cancelled', 'Cancelled')
+        ]
+    status = models.CharField(choices=STATUS_CHOICES, default='pending')
+    is_paid = models.BooleanField(default=False)
+    estimated_time = models.IntegerField(default=0)
+    items = models.JSONField(default=list)
+    created_at = models.DateTimeField(default=timezone.now())
 
-    def __str__(self):
-        return f"{self.product_name} ({self.customer.name})"
+    def total_amount(self):
+        total = 0
+        for item in self.items:
+            total += item['qty'] * item['price']
+
+        return total
+
+    def is_locked(self):
+        return (timezone.now() - self.created_at) < timedelta(minutes=15)
+
 
 class Payment(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_date = models.DateTimeField(auto_now_add=True)
-    payment_method = models.CharField(max_length=50)  # e.g., UPI, Card, etc.
-    status = models.CharField(max_length=20, default='Success')  # Success, Failed
-
-    def __str__(self):
-        return f"Payment for Order #{self.order.id}"
-
+    payment_time = models.DateTimeField(default=timezone.now())
 

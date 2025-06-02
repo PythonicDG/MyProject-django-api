@@ -26,5 +26,13 @@ urlpatterns = [
     path('cart/<int:id>/', views.CartDetailAPIView.as_view()),
     
     path('',include(router.urls)),
-    path('testing/', views.preview_email, name='preview_email')
+    path('testing/', views.preview_email, name='preview_email'),
+
+    #order and payment
+    path('place_order/', views.place_order, name='place_order'),
+    path('make_payment/', views.make_payment, name='make_payment'),
+    path('update_order_status/', views.update_order_status, name='update_order_status'),
+    path('remove_item/', views.remove_item, name='remove_item'),
+    path('cancel_order/', views.cancel_order, name='cancel_order'),
+    path('get_orders/', views.get_orders, name='get_orders')
 ]

@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category
+from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category, Order, Payment
 import smtplib
 import random
 import json
@@ -43,6 +43,7 @@ from django.template.loader import render_to_string
 from email.mime.image import MIMEImage
 from datetime import datetime
 import os
+from django.core.paginator import Paginator
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -522,3 +523,111 @@ def preview_email(request):
 
 
 #Order and Payment
+@api_view(['POST'])
+def place_order(request):
+    data = request.data
+
+    order = Order.objects.create(
+        customer_name = data['customer_name'],
+        customer_email = data['customer_email'],
+        estimated_time = data.get('estimated_time',30),
+        items = data['items']
+    )
+
+    return Response({'Status': 'Order Placed', 'order_id': order.id})
+
+@api_view(['POST'])
+def make_payment(request):
+    data = request.data
+    
+    order = Order.objects.get(id=data['order_id'])
+    if order.is_paid:
+        return JsonResponse({"message":"payment is alredy done"})
+    
+    amount = order.total_amount()
+
+    Payment.objects.create(order=order, amount=amount)
+    order.is_paid = True
+    order.save()
+
+    return JsonResponse({"status":"Payment Successfully", "amount": str(amount)})
+
+
+@api_view(['POST'])
+def update_order_status(request):
+    data = request.data
+    
+    order = Order.objects.get(id = data['order_id'])
+
+    status = data['status']
+    if status not in dict(Order.STATUS_CHOICES):
+        return JsonResponse({"error":"Invalid status"})
+    
+    order.status = status
+    order.save()
+
+    return JsonResponse({"message":"status updated"})
+
+@api_view(['POST'])
+def remove_item(request):
+    data = request.data
+
+    order = Order.objects.get(id=data['order_id'])
+    if order.is_paid:
+        return JsonResponse({"message":"You cannot remove item after payment"})
+    if order.is_locked():
+        return JsonResponse({"message":"You cannot remove items after 10 mins"})
+
+    item_name = data['item_name']
+    new_items = []
+    for i in order.items:
+        if i['name'] != item_name:
+            new_items.append(i)
+    order.items = new_items
+    order.save()
+
+    return JsonResponse({"message":"Item is removed from order","item name": item_name})
+
+@api_view(['POST'])
+def cancel_order(request):
+    data = request.data
+
+    order = Order.objects.get(id=data['order_id'])
+    if order.is_paid:
+        return JsonResponse({"message":"You cannot cancel the order after Payment"})
+    
+    if order.is_locked():
+        return JsonResponse({"message":"You cannot cancel the order after 10 mins"})
+    
+    order.status = 'cancelled'
+    order.save()
+
+    return JsonResponse({"status":"Order Cancelled"})
+
+@api_view(['GET'])
+def get_orders(request):
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 5))
+    orders = Order.objects.all().order_by('-created_at')
+    paginator = Paginator(orders, page_size)
+    page_obj = paginator.get_page(page)
+
+    result = []
+    for order in page_obj:
+        result.append({
+            'order_id': order.id,
+            'customer_name': order.customer_name,
+            'status': order.status,
+            'is_paid': order.is_paid,
+            'created_at': order.created_at,
+            'items': order.items,
+            'estimated_time': order.estimated_time,
+            'total': order.total_amount()
+        })
+
+    return Response({
+        'orders': result,
+        'page': page,
+        'total_pages': paginator.num_pages,
+        'total_orders': paginator.count
+    })
