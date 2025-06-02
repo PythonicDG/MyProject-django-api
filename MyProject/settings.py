@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
+import datetime
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.sites',
     'django.contrib.auth',
@@ -129,6 +130,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 #added by me ----------
 
 AUTHENTICATION_BACKENDS = [
@@ -142,8 +144,6 @@ REST_FRAMEWORK = {
 }
 
 
-#when should i include above code.
-import datetime
 TOKEN_TTL = datetime.timedelta(seconds= 1000)
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -160,3 +160,5 @@ STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'mystaticfiles'),
     ]
 SITE_ID = 1
+
+ASGI_APPLICATION = 'MyProject.asgi.application'
