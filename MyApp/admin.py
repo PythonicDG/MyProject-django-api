@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import CustomUser, CustomGroup, CustomToken, TempModel, Cart, Category, Product, Order, Payment
+from .models import CustomUser, CustomGroup, CustomToken, TempModel, Cart, Category, Product, Order, Payment, Customer, OrderedItem
 
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['first_name','username','phone_number','email']
@@ -56,14 +56,36 @@ class ProductAdmin(admin.ModelAdmin):
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
+        'id',
         'customer_name',
         'status',
         'is_paid',
         'customer_email'
     )
 
+class OrderedItemAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'order',
+        'qty',
+        'price'
 
+    )
 
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'order',
+        'amount',
+        'transaction_id'
+    )
+
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = (
+        'customer_name',
+        'customer_email',
+        'total_orders'
+    )
 admin.site.register(CustomToken, TokenAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(CustomGroup, GroupAdmin)
@@ -72,4 +94,6 @@ admin.site.register(Cart, CartAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Order, OrderAdmin)
-admin.site.register(Payment)
+admin.site.register(Payment,PaymentAdmin)
+admin.site.register(OrderedItem, OrderedItemAdmin)
+admin.site.register(Customer, CustomerAdmin)

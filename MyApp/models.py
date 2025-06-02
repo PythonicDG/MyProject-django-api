@@ -66,24 +66,34 @@ class Cart(models.Model):
     def __str__(self):
         return self.name
 
+class Customer(models.Model):
+    customer_name = models.CharField(max_length=100)
+    customer_email = models.EmailField()
+    
+    def total_orders(self):
+        return self.orders.filter(is_paid=True).count()
+    
+    def __str__(self):
+        return self.customer_name
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
-
-
     def __str__(self):
         return self.name
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
     categories = models.ManyToManyField(Category, related_name='products')
-    is_active = models.BooleanField(default=True,)
-
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
 
 class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()
     STATUS_CHOICES = [
@@ -91,26 +101,38 @@ class Order(models.Model):
         ('preparing', 'Preparing'),
         ('served', 'Served'),
         ('cancelled', 'Cancelled')
-        ]
-    status = models.CharField(choices=STATUS_CHOICES, default='pending')
+    ]
+    status = models.CharField(choices=STATUS_CHOICES, default='pending', max_length=20)
     is_paid = models.BooleanField(default=False)
-    estimated_time = models.IntegerField(default=0)
-    items = models.JSONField(default=list)
-    created_at = models.DateTimeField(default=timezone.now())
+    created_at = models.DateTimeField(default=timezone.now)
 
     def total_amount(self):
-        total = 0
-        for item in self.items:
-            total += item['qty'] * item['price']
+        return sum(item.qty * item.price for item in self.ordered_items.all())
 
-        return total
 
-    def is_locked(self):
-        return (timezone.now() - self.created_at) < timedelta(minutes=15)
+    def __str__(self):
+        return self.customer_name
 
+class OrderedItem(models.Model):
+    order = models.ForeignKey(Order, related_name='ordered_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    qty = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)  
+
+    def __str__(self):
+        return f"{self.qty} x {self.product.name}"
 
 class Payment(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_time = models.DateTimeField(default=timezone.now())
 
+    transaction_id = models.CharField(max_length=100, unique=True)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_time = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.order.customer_name
+
+
+
+
+        

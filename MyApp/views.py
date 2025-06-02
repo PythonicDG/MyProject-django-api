@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category, Order, Payment
+from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category, Order, Payment, OrderedItem, Customer
 import smtplib
 import random
 import json
@@ -527,30 +527,70 @@ def preview_email(request):
 def place_order(request):
     data = request.data
 
-    order = Order.objects.create(
-        customer_name = data['customer_name'],
-        customer_email = data['customer_email'],
-        estimated_time = data.get('estimated_time',30),
-        items = data['items']
+    customer, created = Customer.objects.get_or_create(
+        customer_email=data['customer_email'],
+        defaults={'customer_name': data['customer_name']}
     )
 
+    order = Order.objects.create(
+        customer=customer
+    )
+
+    for item in data['items']:
+        try:
+            product = Product.objects.get(id=item['product_id'], is_active=True)
+        except Product.DoesNotExist:
+            order.delete()
+            return Response({'error': f"Product with ID {item['product_id']} not found or inactive"}, status=400)
+
+        OrderedItem.objects.create(
+            order=order,
+            product=product,
+            qty=item['qty'],
+            price=product.price  
+        )
+
     return Response({'Status': 'Order Placed', 'order_id': order.id})
+
 
 @api_view(['POST'])
 def make_payment(request):
     data = request.data
-    
-    order = Order.objects.get(id=data['order_id'])
+    try:
+        order = Order.objects.get(id=data['order_id'])
+    except Order.DoesNotExist:
+        return Response({'error': 'Order not found'}, status=404)
+
     if order.is_paid:
-        return JsonResponse({"message":"payment is alredy done"})
-    
+        return Response({'message': 'Payment already made'})
+
     amount = order.total_amount()
 
-    Payment.objects.create(order=order, amount=amount)
+    Payment.objects.create(order=order, amount=amount, transaction_id=data['transaction_id'])
     order.is_paid = True
+    order.status = 'Served'
     order.save()
 
-    return JsonResponse({"status":"Payment Successfully", "amount": str(amount)})
+    item_details = []
+    for item in order.ordered_items.all():
+        print("we are inside the loop")
+        item_total = item.qty * item.price
+        item_details.append({
+            'product_name': item.product.name,
+            'qty': item.qty,
+            'unit_price': float(item.price),
+            'total': float(item_total)
+        })
+
+    return Response({
+        'status': 'Payment Successful',
+        'order_id': order.id,
+        'customer': order.customer.customer_name,
+        'items': item_details,
+        'total_amount': float(amount),
+        'paid_at': order.payment.payment_time
+    })
+
 
 
 @api_view(['POST'])
@@ -571,38 +611,25 @@ def update_order_status(request):
 @api_view(['POST'])
 def remove_item(request):
     data = request.data
-
     order = Order.objects.get(id=data['order_id'])
-    if order.is_paid:
-        return JsonResponse({"message":"You cannot remove item after payment"})
-    if order.is_locked():
-        return JsonResponse({"message":"You cannot remove items after 10 mins"})
 
-    item_name = data['item_name']
-    new_items = []
-    for i in order.items:
-        if i['name'] != item_name:
-            new_items.append(i)
-    order.items = new_items
-    order.save()
+    try:
+        item = OrderedItem.objects.get(order=order, product__id=data['product_id'])
+        item.delete()
+        return Response({'message': 'Item removed'})
+    except OrderedItem.DoesNotExist:
+        return Response({'error': 'Item not found in order'}, status=404)
 
-    return JsonResponse({"message":"Item is removed from order","item name": item_name})
 
 @api_view(['POST'])
 def cancel_order(request):
     data = request.data
-
     order = Order.objects.get(id=data['order_id'])
-    if order.is_paid:
-        return JsonResponse({"message":"You cannot cancel the order after Payment"})
-    
-    if order.is_locked():
-        return JsonResponse({"message":"You cannot cancel the order after 10 mins"})
-    
+
     order.status = 'cancelled'
     order.save()
+    return Response({'status': 'Order Cancelled'})
 
-    return JsonResponse({"status":"Order Cancelled"})
 
 @api_view(['GET'])
 def get_orders(request):
@@ -614,15 +641,21 @@ def get_orders(request):
 
     result = []
     for order in page_obj:
+        items = [{
+            'product_id': i.product.id,
+            'product_name': i.product.name,
+            'qty': i.qty,
+            'price': float(i.price)
+        } for i in order.ordered_items.all()]
+        
         result.append({
             'order_id': order.id,
             'customer_name': order.customer_name,
             'status': order.status,
             'is_paid': order.is_paid,
             'created_at': order.created_at,
-            'items': order.items,
-            'estimated_time': order.estimated_time,
-            'total': order.total_amount()
+            'items': items,
+            'total': float(order.total_amount())
         })
 
     return Response({
