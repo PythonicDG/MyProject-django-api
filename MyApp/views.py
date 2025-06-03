@@ -52,6 +52,8 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from decimal import Decimal
 
+import pandas as pd
+from django.http import HttpResponse
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -687,3 +689,13 @@ def get_orders(request):
         'total_pages': paginator.num_pages,
         'total_orders': paginator.count
     })
+
+@api_view(['GET'])
+def download_excel(request):
+    products = Product.objects.all()
+    df = pd.DataFrame(list(products))
+    print(df)
+    df.to_excel('products.xlsx', index=True)
+    print(type(df))
+    
+    return Response("Excel file downloaded successfully")
