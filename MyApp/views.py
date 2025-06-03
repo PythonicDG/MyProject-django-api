@@ -1,3 +1,5 @@
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -44,6 +46,12 @@ from email.mime.image import MIMEImage
 from datetime import datetime
 import os
 from django.core.paginator import Paginator
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from decimal import Decimal
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -523,6 +531,7 @@ def preview_email(request):
 
 
 #Order and Payment
+
 @api_view(['POST'])
 def place_order(request):
     data = request.data
@@ -531,12 +540,11 @@ def place_order(request):
         customer_email=data['customer_email'],
         defaults={'customer_name': data['customer_name']}
     )
+    
 
-    order = Order.objects.create(
-        customer=customer
-    )
+    order = Order.objects.create(customer=customer)
 
-    for item in data['items']:
+    for item in data.get('items', []):
         try:
             product = Product.objects.get(id=item['product_id'], is_active=True)
         except Product.DoesNotExist:
@@ -547,10 +555,22 @@ def place_order(request):
             order=order,
             product=product,
             qty=item['qty'],
-            price=product.price  
+            price=product.price
         )
 
-    return Response({'Status': 'Order Placed', 'order_id': order.id})
+    
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "orders",
+        {
+            "type": "send_order_notification",
+            "data": {
+                "message": f"New order placed by {customer.customer_name} (Order ID: {order.id})"
+            }
+        }
+    )
+
+    return JsonResponse({'message': 'Order placed successfully', 'order_id': order.id})
 
 
 @api_view(['POST'])
@@ -566,6 +586,9 @@ def make_payment(request):
 
     amount = order.total_amount()
 
+    if 'order_id' not in data or 'transaction_id' not in data:
+        return Response({'error': 'Invalid payment data'}, status=400)
+        
     Payment.objects.create(order=order, amount=amount, transaction_id=data['transaction_id'])
     order.is_paid = True
     order.status = 'Served'

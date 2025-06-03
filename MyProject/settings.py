@@ -162,3 +162,8 @@ STATICFILES_DIRS = [
 SITE_ID = 1
 
 ASGI_APPLICATION = 'MyProject.asgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
