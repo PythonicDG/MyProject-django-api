@@ -157,7 +157,7 @@ EMAIL_HOST_PASSWORD = 'epfgkbrqivwyxsbc'
 
 import os
 STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'mystaticfiles'),
+        os.path.join(BASE_DIR, 'staticfiles'),
     ]
 SITE_ID = 1
 
