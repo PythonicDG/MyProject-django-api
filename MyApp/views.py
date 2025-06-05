@@ -726,7 +726,6 @@ def upload_excel(request):
     
     products = Product.objects.all()
 
-    
     for index, row in df.iterrows():
         product_name = row.get('name')
         product_price = row.get('price')
@@ -751,7 +750,9 @@ def upload_excel(request):
             product.price = product_price
             product.is_active = product_is_active
             product.save()
+            
         product.categories.set([category])
+
     return JsonResponse({"message":"File uploaded successfully"})
 
 @api_view(['GET'])
