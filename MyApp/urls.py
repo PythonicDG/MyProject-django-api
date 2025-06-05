@@ -38,5 +38,8 @@ urlpatterns = [
 
     #excel file upload and download and processing  
     path('download_excel/', views.download_excel, name='download_excel'),
+    path('upload_excel/', views.upload_excel, name='upload_excel'),
+    #testing
+    path('test/', views.test, name='test')
     
 ]

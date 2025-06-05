@@ -132,6 +132,13 @@ class Payment(models.Model):
     def __str__(self):
         return self.order.customer_name
 
+    
+class Storage(models.Model):
+    file = models.FileField()
+
+    def __str__(self):
+        return self.file.path
+
 
 
 

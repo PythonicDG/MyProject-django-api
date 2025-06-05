@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from django.contrib.auth.models import User, Group
-from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category, Order, Payment, OrderedItem, Customer
+from .models import CustomToken, TempModel, CustomUser, Cart, Product, Category, Order, Payment, OrderedItem, Customer, Storage
 import smtplib
 import random
 import json
@@ -54,6 +54,10 @@ from decimal import Decimal
 
 import pandas as pd
 from django.http import HttpResponse
+from rest_framework.decorators import api_view
+from django.http import HttpResponse
+import pandas as pd
+import io
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -567,7 +571,7 @@ def place_order(request):
         {
             "type": "send_order_notification",
             "data": {
-                "message": f"New order placed by {customer.customer_name} (Order ID: {order.id})"
+                "message": f"New order placed (Order ID: {order.id})"
             }
         }
     )
@@ -690,12 +694,73 @@ def get_orders(request):
         'total_orders': paginator.count
     })
 
+
 @api_view(['GET'])
 def download_excel(request):
-    products = Product.objects.all()
-    df = pd.DataFrame(list(products))
-    print(df)
-    df.to_excel('products.xlsx', index=True)
-    print(type(df))
+    model_name = request.GET.get('name')
+
+    if not model_name:
+        return Response("Please provide Model Name ")
+
+    model = eval(f"{model_name}.objects.all().values()")
+    df = pd.DataFrame(list(model))
+
+    file_path = os.path.join(settings.MEDIA_ROOT, 'excel_files', f'{model_name}.xlsx')
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    df.to_excel(file_path, index=False)
+
+    return JsonResponse({"message": "file saved successfully", "path": file_path})
+
+@api_view(['POST'])
+def upload_excel(request):
+    file = request.FILES['file']
+
+    if not file:
+        return JsonResponse({"message":"Please upload a valid file"})
     
-    return Response("Excel file downloaded successfully")
+    excel_file =    file.read()
+    excel_file = io.BytesIO(excel_file)
+
+    df = pd.read_excel(excel_file)
+    
+    products = Product.objects.all()
+
+    
+    for index, row in df.iterrows():
+        product_name = row.get('name')
+        product_price = row.get('price')
+        product_is_active = row.get('is_active')
+        category = row.get('category')
+        
+        category = Category.objects.get(name=category)
+
+        if not product_name or not product_price:
+            return JsonResponse({"message": "Invalid data in the file"})
+
+        product, created = Product.objects.get_or_create(
+            name=product_name,
+            defaults={
+                'price': product_price,
+                'is_active': product_is_active,
+                
+            }
+        )
+
+        if not created:
+            product.price = product_price
+            product.is_active = product_is_active
+            product.save()
+        product.categories.set([category])
+    return JsonResponse({"message":"File uploaded successfully"})
+
+@api_view(['GET'])
+def test(request):
+    storage = Storage.objects.all()
+    
+    temp = Storage.objects.get(file='products.xlsx')
+    
+    path = temp.file.path
+
+    return JsonResponse({"message":"success","path":path})
+
