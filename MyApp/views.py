@@ -750,7 +750,7 @@ def upload_excel(request):
             product.price = product_price
             product.is_active = product_is_active
             product.save()
-            
+
         product.categories.set([category])
 
     return JsonResponse({"message":"File uploaded successfully"})
