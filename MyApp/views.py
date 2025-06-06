@@ -714,35 +714,88 @@ def download_excel(request):
 
 @api_view(['POST'])
 def upload_excel(request):
-    file = request.FILES['file']
+    file = request.FILES.get('file')
 
     if not file:
-        return JsonResponse({"message":"Please upload a valid file"})
-    
-    excel_file =    file.read()
-    excel_file = io.BytesIO(excel_file)
+        return JsonResponse({"message": "Please upload a valid file"})
 
-    df = pd.read_excel(excel_file)
-    
-    products = Product.objects.all()
+    #excel_file = io.BytesIO(file.read())
+    df = pd.read_excel(file)
 
+    errors = []
+    category_names = list(Category.objects.values_list('name', flat=True))
+
+    print(category_names)
+    
     for index, row in df.iterrows():
+        id = row.get('id')
         product_name = row.get('name')
         product_price = row.get('price')
         product_is_active = row.get('is_active')
-        category = row.get('category')
-        
-        category = Category.objects.get(name=category)
+        category_name = row.get('category')
 
-        if not product_name or not product_price:
-            return JsonResponse({"message": "Invalid data in the file"})
+        skip = False
+        row_error = {}
+        category_obj = None  
+
+        def val(field):
+            value = row.get(field)
+            if pd.isna(value):
+                row_error[field] = 'Missing'
+                return 'Missing'
+            return value
+
+        val_id = val('id')
+        val_name = val('name')
+        val_price = val('price')
+        val_active = val('is_active')
+        val_category = val('category')
+        
+               
+        if not (isinstance(product_price, int) or isinstance(product_price, float)):
+            try:
+                product_price = float(product_price)
+            except (ValueError, TypeError):
+                skip = True
+                val_price = 'provide int value'
+        
+        if val_active != 'Missing':
+            val_active = bool(val_active)
+
+        if val_category not in category_names and not pd.isna(val_category):
+            val_category = 'invalid category'
+            skip = True
+        
+        errors.append({
+            'id': val_id,
+            'name': val_name,
+            'price': val_price,
+            'is_active': val_active,
+            'category': val_category
+        })
+
+        
+
+        if val_name == 'Missing' or val_price == 'Missing':
+            skip = True
+
+        if val_category != 'Missing':
+            try:
+                category_obj = Category.objects.get(name=val_category)
+            except Category.DoesNotExist:
+                row_error['category'] = 'Missing'
+                skip = True
+        else:
+            skip = True
+
+        if skip:
+            continue  
 
         product, created = Product.objects.get_or_create(
-            name=product_name,
+            name=val_name,
             defaults={
                 'price': product_price,
                 'is_active': product_is_active,
-                
             }
         )
 
@@ -751,9 +804,15 @@ def upload_excel(request):
             product.is_active = product_is_active
             product.save()
 
-        product.categories.set([category])
+        if category_obj is not None:
+            product.categories.set([category_obj])
 
-    return JsonResponse({"message":"File uploaded successfully"})
+    if errors:
+        errors_df = pd.DataFrame(errors)
+        errors_df.to_excel('error_log.xlsx', index=False)
+
+    return JsonResponse({"message": "File uploaded successfully"})
+
 
 @api_view(['GET'])
 def test(request):
