@@ -6,16 +6,51 @@ from MyApp.models import Order, CustomToken
 import json
 
 
+
 class OrderConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
+        from urllib.parse import parse_qs
+
         self.user = await self.get_user()
         if isinstance(self.user, AnonymousUser):
             await self.close()
-        else:
-            await self.channel_layer.group_add("orders", self.channel_name)
-            await self.accept()
+            return
 
+        await self.channel_layer.group_add("orders", self.channel_name)
+        await self.accept()
+
+        query_params = parse_qs(self.scope['query_string'].decode())
+        page = query_params.get('page', ['1'])[0] or '1'
+        page_size = query_params.get('page_size', ['10'])[0] or '10'
+        is_paid = query_params.get('is_paid', [None])[0]
+        order_id = query_params.get('order_id', [None])[0]
+
+        try:
+            page = int(page)
+        except (TypeError, ValueError):
+            page = 1
+
+        try:
+            page_size = int(page_size)
+        except (TypeError, ValueError):
+            page_size = 10
+
+        if is_paid is not None:
+            is_paid = is_paid.lower() == 'true'
+        if order_id is not None:
+            try:
+                order_id = int(order_id)
+            except (TypeError, ValueError):
+                order_id = None
+
+        orders = await self.get_orders(self.user, page, page_size, is_paid, order_id)
+        await self.send_json({"orders": orders})
+
+        await self.channel_layer.group_send("orders", {
+            "type": "send_order_notification",
+            "data": orders
+        })
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard("orders", self.channel_name)
 
@@ -28,16 +63,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             action = data.get("action")
 
-            if action == "get_orders":
-                page = int(data.get("page", 1))
-                page_size = int(data.get("page_size", 10))
-                is_paid = data.get("is_paid", None)
-                order_id = data.get("order_id", None)
-
-                orders = await self.get_orders(page, page_size, is_paid, order_id)
-                await self.send_json({"orders": orders})
-
-            elif action == "send_message":
+            if action == "send_message":
                 message = data.get("message")
                 if message:
                     await self.channel_layer.group_send("orders", {
@@ -52,6 +78,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         except json.JSONDecodeError as e:
             await self.send_json({"error": "Invalid JSON", "details": str(e)})
+
         except Exception as e:
             await self.send_json({"error": "Server error", "details": str(e)})
 
@@ -64,24 +91,25 @@ class OrderConsumer(AsyncWebsocketConsumer):
         try:
             token = CustomToken.objects.get(key=token_key)
             return token.user if token.is_valid() else AnonymousUser()
-            
+
         except CustomToken.DoesNotExist:
             return AnonymousUser()
 
     @database_sync_to_async
-    def get_orders(self, page, page_size, is_paid, order_id):
-        qs = Order.objects.all().order_by('-created_at')
+    def get_orders(self, user, page=1, page_size=10, is_paid=None, order_id=None):
+        orders = Order.objects.filter(customer_name=user)
 
         if is_paid is not None:
             if str(is_paid).lower() == 'true':
-                qs = qs.filter(is_paid=True)
+                orders = orders.filter(is_paid=True)
+
             elif str(is_paid).lower() == 'false':
-                qs = qs.filter(is_paid=False)
+                orders = orders.filter(is_paid=False)
 
         if order_id:
-            qs = qs.filter(id=order_id)
-
-        paginator = Paginator(qs, page_size)
+            orders = orders.filter(id=order_id)
+        print(user)
+        paginator = Paginator(orders, page_size)
         page_obj = paginator.get_page(page)
 
         result = []
