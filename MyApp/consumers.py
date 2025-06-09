@@ -64,6 +64,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
         try:
             token = CustomToken.objects.get(key=token_key)
             return token.user if token.is_valid() else AnonymousUser()
+            
         except CustomToken.DoesNotExist:
             return AnonymousUser()
 
@@ -85,12 +86,15 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         result = []
         for order in page_obj:
-            items = [{
-                'product_id': item.product.id,
-                'product_name': item.product.name,
-                'qty': item.qty,
-                'price': float(item.price)
-            } for item in order.ordered_items.all()]
+            items = []
+            for item in order.ordered_items.all():
+                item_data = {
+                    'product_id': item.product.id,
+                    'product_name': item.product.name,
+                    'qty': item.qty,
+                    'price': float(item.price)
+                }
+                items.append(item_data)
 
             result.append({
                 'order_id': order.id,

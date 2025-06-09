@@ -774,8 +774,7 @@ def upload_excel(request):
             'category': val_category
         })
 
-        
-
+    
         if val_name == 'Missing' or val_price == 'Missing':
             skip = True
 
