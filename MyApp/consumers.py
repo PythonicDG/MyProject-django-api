@@ -46,7 +46,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         orders = await self.get_orders(self.user, page, page_size, is_paid, order_id)
         await self.send_json({"orders": orders})
-
+        
         await self.channel_layer.group_send("orders", {
             "type": "send_order_notification",
             "data": orders
@@ -108,7 +108,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         if order_id:
             orders = orders.filter(id=order_id)
-        print(user)
+
         paginator = Paginator(orders, page_size)
         page_obj = paginator.get_page(page)
 
