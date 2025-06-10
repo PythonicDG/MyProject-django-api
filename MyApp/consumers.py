@@ -17,7 +17,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
             await self.close()
             
 
-        await self.channel_layer.group_add("orders", self.channel_name)
+        #await self.channel_layer.group_add("orders", self.channel_name)
         await self.accept()
 
         query_params = parse_qs(self.scope['query_string'].decode())
@@ -65,8 +65,40 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         try:
             data = json.loads(text_data)
-            action = data.get("action")
+            #action = data.get("action")
 
+            order_id = data.get("order_id")       
+            page = data.get("page")
+            page_size = data.get("page_size")
+            is_paid = data.get("is_paid")
+
+            if order_id is not None:
+                try:
+                    order_id = int(order_id)
+
+                except (TypeError, ValueError):
+                    await self.send_json({"error", "Invalid order id format"})
+
+            try:
+                page = int(page)
+
+            except (TypeError, ValueError):
+                page = 1
+
+            try:
+                page_size = int(page_size)
+            except (TypeError, ValueError):
+                page_size = 10
+            
+            if is_paid is not None:
+                is_paid = str(is_paid).lower() == "true"
+
+            
+            orders = await self.get_orders(self.user, page=page, page_size=page_size, is_paid=is_paid ,order_id=order_id)
+            
+            await self.send_json({"orders":orders})
+
+            '''
             if action == "send_message":
                 message = data.get("message")
                 if message:
@@ -74,11 +106,13 @@ class OrderConsumer(AsyncWebsocketConsumer):
                         "type": "send_order_notification",
                         "data": message
                     })
+
                 else:
                     await self.send_json({"error": "Missing 'message' key"})
 
             else:
                 await self.send_json({"error": "Invalid action"})
+            '''
 
         except json.JSONDecodeError as e:
             await self.send_json({"error": "Invalid JSON", "details": str(e)})
@@ -103,7 +137,8 @@ class OrderConsumer(AsyncWebsocketConsumer):
             return token.user if token.is_valid() else AnonymousUser()
 
         except CustomToken.DoesNotExist:
-            return AnonymousUser()
+            return AnonymousUser()        
+
 
     @database_sync_to_async
     def get_orders(self, user, page=1, page_size=10, is_paid=None, order_id=None):
