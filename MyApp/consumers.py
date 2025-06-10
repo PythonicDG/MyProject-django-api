@@ -15,7 +15,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
         self.user = await self.get_user()
         if isinstance(self.user, AnonymousUser):
             await self.close()
-            return
+            
 
         await self.channel_layer.group_add("orders", self.channel_name)
         await self.accept()
@@ -33,6 +33,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         try:
             page_size = int(page_size)
+        
         except (TypeError, ValueError):
             page_size = 10
 
@@ -45,12 +46,15 @@ class OrderConsumer(AsyncWebsocketConsumer):
                 order_id = None
 
         orders = await self.get_orders(self.user, page, page_size, is_paid, order_id)
+
         await self.send_json({"orders": orders})
+
         
-        await self.channel_layer.group_send("orders", {
-            "type": "send_order_notification",
-            "data": orders
-        })
+        #await self.channel_layer.group_send("orders", {
+        #   "type": "send_order_notification",
+        #    "data": orders
+        #})
+        
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard("orders", self.channel_name)
 
@@ -87,7 +91,13 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_user(self):
-        token_key = self.scope['query_string'].decode().split('token=')[-1]
+        from urllib.parse import parse_qs
+        query_params = parse_qs(self.scope['query_string'].decode())
+        token_key = query_params.get('token',[None])[0]
+
+        if not token_key:
+            return AnonymousUser()
+
         try:
             token = CustomToken.objects.get(key=token_key)
             return token.user if token.is_valid() else AnonymousUser()
@@ -97,7 +107,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_orders(self, user, page=1, page_size=10, is_paid=None, order_id=None):
-        orders = Order.objects.filter(customer_name=user)
+        orders = Order.objects.filter(customer__user=user)
 
         if is_paid is not None:
             if str(is_paid).lower() == 'true':
@@ -111,7 +121,6 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         paginator = Paginator(orders, page_size)
         page_obj = paginator.get_page(page)
-
         result = []
         for order in page_obj:
             items = []

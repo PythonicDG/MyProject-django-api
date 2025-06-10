@@ -65,16 +65,18 @@ class Cart(models.Model):
 
     def __str__(self):
         return self.name
-
+        
 class Customer(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="customer_profile")
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()
-    
+
     def total_orders(self):
         return self.orders.filter(is_paid=True).count()
-    
+
     def __str__(self):
         return self.customer_name
+
 
 
 class Category(models.Model):
@@ -93,6 +95,7 @@ class Product(models.Model):
         return self.name
 
 class Order(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_orders')
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='orders')
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()

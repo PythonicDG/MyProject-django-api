@@ -537,18 +537,26 @@ def preview_email(request):
 
 
 #Order and Payment
-
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def place_order(request):
     data = request.data
+    user = request.user
 
     customer, created = Customer.objects.get_or_create(
-        customer_email=data['customer_email'],
-        defaults={'customer_name': data['customer_name']}
+        user=user,
+        defaults={
+            'customer_email': data.get('customer_email', ''),
+            'customer_name': data.get('customer_name', '')
+        }
     )
-    
 
-    order = Order.objects.create(customer=customer)
+    order = Order.objects.create(
+        user=user,
+        customer=customer,
+        customer_name=customer.customer_name,
+        customer_email=customer.customer_email
+    )
 
     for item in data.get('items', []):
         try:
@@ -564,7 +572,6 @@ def place_order(request):
             price=product.price
         )
 
-    
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         "orders",
