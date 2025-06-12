@@ -24,7 +24,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Cart
-from .serializers import CartSerializer, CategorySerializer, ProductSerializer
+from .serializers import CartSerializer, CategorySerializer, ProductSerializer, OrderSerializer
 from rest_framework import viewsets, filters
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
@@ -665,6 +665,13 @@ def cancel_order(request):
     order.status = 'cancelled'
     order.save()
     return Response({'status': 'Order Cancelled'})
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all().order_by('-created_at')
+    serializer_class = OrderSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['customer_name', 'status']
+    ordering_fields = ['created_at', 'status']
 
 
 @api_view(['GET'])
