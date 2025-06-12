@@ -13,9 +13,9 @@ class OrderConsumer(AsyncWebsocketConsumer):
         from urllib.parse import parse_qs
 
         self.user = await self.get_user()
+        
         if isinstance(self.user, AnonymousUser):
             await self.close()
-            
 
         #await self.channel_layer.group_add("orders", self.channel_name)
         await self.accept()
@@ -47,7 +47,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         orders = await self.get_orders(self.user, page, page_size, is_paid, order_id)
 
-        await self.send_json({"orders": orders})
+        await self.send_json({"orders": orders,"user": self.user.id})
 
         
         #await self.channel_layer.group_send("orders", {
@@ -95,8 +95,8 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
             
             orders = await self.get_orders(self.user, page=page, page_size=page_size, is_paid=is_paid ,order_id=order_id)
-            
-            await self.send_json({"orders":orders})
+
+            await self.send_json({"orders":orders, "channel_name": self.channel_name, "channel_path": self.scope['client']})
 
             '''
             if action == "send_message":
