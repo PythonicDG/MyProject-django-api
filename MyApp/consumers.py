@@ -65,7 +65,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         try:
             data = json.loads(text_data)
-            #action = data.get("action")
+            action = data.get("action")
 
             order_id = data.get("order_id")       
             page = data.get("page")
@@ -98,7 +98,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
             await self.send_json({"orders":orders, "channel_name": self.channel_name, "channel_path": self.scope['client']})
 
-            '''
+            
             if action == "send_message":
                 message = data.get("message")
                 if message:
@@ -112,7 +112,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
             else:
                 await self.send_json({"error": "Invalid action"})
-            '''
+            
 
         except json.JSONDecodeError as e:
             await self.send_json({"error": "Invalid JSON", "details": str(e)})

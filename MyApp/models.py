@@ -43,7 +43,7 @@ class CustomToken(Token):
 
     def save(self, *args, **kwargs):
         if not self.expiry_time:
-            self.expiry_time = timezone.now() + timedelta(seconds=1000)
+            self.expiry_time = timezone.now() + timedelta(seconds=10)
         super().save(*args, **kwargs)
 
 class TempModel(models.Model):
