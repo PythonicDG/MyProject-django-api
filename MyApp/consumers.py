@@ -4,9 +4,8 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.paginator import Paginator
 from MyApp.models import Order, CustomToken
 import json
-
-
-
+import asyncio
+import time
 class OrderConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
@@ -47,9 +46,10 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         orders = await self.get_orders(self.user, page, page_size, is_paid, order_id)
 
-        await self.send_json({"orders": orders,"user": self.user.id})
-
         
+        await self.send_json({"orders": orders,"user": self.user.id})
+        
+
         #await self.channel_layer.group_send("orders", {
         #   "type": "send_order_notification",
         #    "data": orders
@@ -65,7 +65,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
 
         try:
             data = json.loads(text_data)
-            action = data.get("action")
+            #action = data.get("action")
 
             order_id = data.get("order_id")       
             page = data.get("page")
@@ -99,20 +99,19 @@ class OrderConsumer(AsyncWebsocketConsumer):
             await self.send_json({"orders":orders, "channel_name": self.channel_name, "channel_path": self.scope['client']})
 
             
-            if action == "send_message":
-                message = data.get("message")
-                if message:
-                    await self.channel_layer.group_send("orders", {
-                        "type": "send_order_notification",
-                        "data": message
-                    })
+            # if action == "send_message":
+            #     message = data.get("message")
+            #     if message:
+            #         await self.channel_layer.group_send("orders", {
+            #             "type": "send_order_notification",
+            #             "data": message
+            #         })
 
-                else:
-                    await self.send_json({"error": "Missing 'message' key"})
+            #     else:
+            #         await self.send_json({"error": "Missing 'message' key"})
 
-            else:
-                await self.send_json({"error": "Invalid action"})
-            
+        except Exception as e:
+            await self.send_json({"error": "Invalid action"})
 
         except json.JSONDecodeError as e:
             await self.send_json({"error": "Invalid JSON", "details": str(e)})
