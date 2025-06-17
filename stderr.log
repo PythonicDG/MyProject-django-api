@@ -568,3 +568,230 @@ Not Found: /favicon.ico
 2025-06-16 15:16:43,671 INFO     HTTP/2 support enabled
 2025-06-16 15:16:43,671 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
 2025-06-16 15:16:43,672 INFO     Listening on TCP address 127.0.0.1:8000
+Not Found: /favicon.ico
+2025-06-16 19:23:16,087 WARNING  Not Found: /favicon.ico
+Not Found: /favicon.ico
+2025-06-17 09:23:23,699 WARNING  Not Found: /favicon.ico
+Not Found: /favicon.ico
+2025-06-17 09:44:25,709 WARNING  Not Found: /favicon.ico
+2025-06-17 09:47:09,287 INFO     Killed 0 pending application instances
+2025-06-17 09:47:16,212 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
+2025-06-17 09:47:16,212 INFO     HTTP/2 support enabled
+2025-06-17 09:47:16,212 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
+2025-06-17 09:47:16,212 INFO     Listening on TCP address 127.0.0.1:8000
+Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+2025-06-17 09:49:19,322 ERROR    Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+2025-06-17 09:49:21,968 WARNING  Bad Request: /
+Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+2025-06-17 09:49:22,210 ERROR    Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+2025-06-17 09:49:22,228 WARNING  Bad Request: /favicon.ico
+Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+2025-06-17 09:50:43,178 ERROR    Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /
+2025-06-17 09:50:43,203 WARNING  Bad Request: /
+Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+2025-06-17 09:50:43,313 ERROR    Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\utils\deprecation.py", line 132, in __acall__
+    response = await sync_to_async(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\asgiref\sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dipak\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\http\request.py", line 186, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app'. You may need to add '07bd-2401-4900-1c17-c159-a435-48a-9301-8e2d.ngrok-free.app' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+2025-06-17 09:50:43,344 WARNING  Bad Request: /favicon.ico
+2025-06-17 09:51:18,165 INFO     Killed 0 pending application instances
+2025-06-17 09:51:19,804 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
+2025-06-17 09:51:19,804 INFO     HTTP/2 support enabled
+2025-06-17 09:51:19,804 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
+2025-06-17 09:51:19,804 INFO     Listening on TCP address 127.0.0.1:8000
+Not Found: /favicon.ico
+2025-06-17 09:51:28,234 WARNING  Not Found: /favicon.ico
+2025-06-17 09:52:27,685 INFO     Killed 0 pending application instances
