@@ -795,3 +795,10 @@ Bad Request: /favicon.ico
 Not Found: /favicon.ico
 2025-06-17 09:51:28,234 WARNING  Not Found: /favicon.ico
 2025-06-17 09:52:27,685 INFO     Killed 0 pending application instances
+2025-06-17 18:00:13,604 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
+2025-06-17 18:00:13,605 INFO     HTTP/2 support enabled
+2025-06-17 18:00:13,605 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
+2025-06-17 18:00:13,606 INFO     Listening on TCP address 127.0.0.1:8000
+Not Found: /favicon.ico
+2025-06-18 09:29:00,264 WARNING  Not Found: /favicon.ico
+2025-06-18 09:37:34,330 INFO     Killed 0 pending application instances

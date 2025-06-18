@@ -23,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+db#qns$pgyu!huhpnp+uvktmk#9-7^u*%phsfsxncrjfahcm$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '75d4-182-70-237-58.ngrok-free.app'
+    '3d17-182-70-50-252.ngrok-free.app'
 
 ]
 
@@ -129,7 +129,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -163,7 +163,6 @@ EMAIL_HOST_USER = 'dipakgaikwadms@gmail.com'
 EMAIL_HOST_PASSWORD = 'epfgkbrqivwyxsbc'
 
 
-
 import os
 STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'staticfiles'),
@@ -183,3 +182,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://e278-182-70-50-252.ngrok-free.app'
+]
