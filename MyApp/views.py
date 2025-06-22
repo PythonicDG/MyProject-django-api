@@ -837,3 +837,9 @@ def test(request):
 
     return JsonResponse({"message":"success","path":path})
 
+
+@api_view(['GET'])
+def get_users(request):
+    users = User.objects.all()
+
+    return JsonResponse({"message":"success","users":list(users.values())})

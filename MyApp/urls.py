@@ -22,7 +22,6 @@ urlpatterns = [
     path('delete_user/<str:username>/', views.delete_user, name='delete_user'),
     path('get_users/',views.get_users, name='get_users'),
     path('update_user/<str:username>/', views.update_user, name='update_user'),
-
     #class based
     path('cart/', views.CartListCreateAPIView.as_view()),
     path('cart/<int:id>/', views.CartDetailAPIView.as_view()),
