@@ -31,6 +31,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://509d-182-69-81-141.ngrok-free.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    "http://localhost:5500",
 ]
 
 # Cookie settings for cross-site requests
@@ -49,7 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    #'corsheaders',
+    'corsheaders',
     'MyApp',
     'rest_framework',
     'rest_framework.authtoken',
@@ -97,9 +98,9 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '',
-        'USER': 'root',
-        'PASSWORD': '',
+        'NAME': 'myproject',
+        'USER': 'dipak',
+        'PASSWORD': 'dipak',
         'HOST': 'localhost',
         'PORT': '5432'
   
@@ -132,6 +133,10 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  
+]
 
 # Media files
 MEDIA_URL = '/media/'

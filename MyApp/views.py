@@ -19,7 +19,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
 from .models import CustomToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
-
+import time
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -58,6 +58,15 @@ from rest_framework.decorators import api_view
 from django.http import HttpResponse
 import pandas as pd
 import io
+
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+import requests
+
+import firebase_admin
+from firebase_admin import credentials, messaging
+from django.http import JsonResponse
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -843,3 +852,38 @@ def get_users(request):
     users = User.objects.all()
 
     return JsonResponse({"message":"success","users":list(users.values())})
+
+#firebase 
+
+from .utils import *
+
+if not firebase_admin._apps:
+    cred = credentials.Certificate('/mnt/c/Users/dipak/Desktop/Company_work/Project1/MyProject/MyApp/firebase_key.json')
+    firebase_admin.initialize_app(cred)
+
+
+def send_notification(request):
+    if request.method == 'GET':
+        print(f"Notification requested at: {time.time()}")
+
+        #registration_token = "cwyc-qKqkucyvBdKClJNkL:APA91bGkNJOtLw94BRfTfKmO2WjP8ck4vAainvJzGfy-YMjVipKP5Dm5B-aJdHNcK1M1WKk_ufOeK0Qdung559ZWwqNAe-qRdryoMoP5uBONMZ8t6Cp_JFg"
+        android_token = "e-GStZFHizecrWnkAR0xs3:APA91bESeIXqPXLxy0imMZ3uA_XH7ghybb93wrEJYC-ensumSkoPCE4AG2K0WQGlYnHqPDV2AA1seluNKNucaAc5rIbKPDlbuLcu0sTV4W5bbiTrd1dqlCw"
+        send_firebase_notification(android_token)
+
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title="Hello from Firebase",
+                body=f"Your token: {android_token[:10]}...",  
+            ),
+            token=android_token,
+        )
+
+        try:
+            response = messaging.send(message)
+            return JsonResponse({"success": True, "message_id": response})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+

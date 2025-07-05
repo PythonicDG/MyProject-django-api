@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Get & Show FCM Token</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+</head>
+<body>
+  <h2>Firebase Cloud Messaging Token</h2>
+  
+  <button id="get-token">Get FCM Token</button><br><br>
+  
+  <textarea id="token-area" rows="5" cols="60" readonly placeholder="Token will appear here..."></textarea><br><br>
+  
+  <button id="copy-token" disabled>Copy Token</button>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUh9VroA9VybQuiBypXR5ba9w17XEWny4",
+      authDomain: "drf-project-4e879.firebaseapp.com",
+      projectId: "drf-project-4e879",
+      storageBucket: "drf-project-4e879.firebasestorage.app",
+      messagingSenderId: "952725174712",
+      appId: "1:952725174712:web:d463e75e8fab69697f374d",
+      measurementId: "G-C0DSQCPQ9V"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then((registration) => {
+        console.log("Service worker registered:", registration);
+
+        document.getElementById('get-token').addEventListener('click', async () => {
+          try {
+            const token = await messaging.getToken({
+              vapidKey: "BCgmO-D-MWl7XB4ydwLb3SyvFn9ojz4naHaI8cZxcZYLMyU-3SMVmq9rpUzWwkX2nfh1k-y0LrCw5BQOeIEf3uA",
+              serviceWorkerRegistration: registration
+            });
+
+            if (token) {
+              console.log("FCM Token:", token);
+              const tokenArea = document.getElementById('token-area');
+              tokenArea.value = token;
+
+              const copyBtn = document.getElementById('copy-token');
+              copyBtn.disabled = false;
+
+              copyBtn.onclick = () => {
+                tokenArea.select();
+                document.execCommand('copy');
+                alert("Token copied to clipboard!");
+              };
+            } else {
+              alert("No token returned. Please check your permissions.");
+            }
+          } catch (error) {
+            console.error("Error getting token:", error);
+          }
+        });
+      })
+      .catch((err) => console.error("Service Worker registration failed:", err));
+  </script>
+</body>
+</html>

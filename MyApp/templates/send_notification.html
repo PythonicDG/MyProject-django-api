@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Notification</title>
+</head>
+<body>
+    <h2>Browser Push Notification Test</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="token" id="device_token">
+        <label>Title: </label><input type="text" name="title" required><br>
+        <label>Body: </label><input type="text" name="body" required><br>
+        <button type="submit">Send Notification</button>
+    </form>
+
+    <!-- Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUh9VroA9VybQuiBypXR5ba9w17XEWny4",
+            authDomain: "drf-project-4e879.firebaseapp.com",
+            projectId: "drf-project-4e879",
+            storageBucket: "drf-project-4e879.appspot.com",
+            messagingSenderId: "952725174712",
+            appId: "1:952725174712:web:d463e75e8fab69697f374d",
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        // Ask permission and get token
+        messaging.requestPermission()
+        .then(() => messaging.getToken({ vapidKey: 'BIXg0r7nLw6uRRewYnzcz0QGwXiweRkKJ_O0c8-1Hfp_kT5v-55zkRlrlMyjtzE_nyDst-kQJQmGdM5nC4wdvtM' }))
+        .then((token) => {
+            console.log("FCM Token:", token);
+            document.getElementById("device_token").value = token;
+        })
+        .catch((err) => console.error("Permission denied", err));
+
+        // Receive messages when browser is open
+        messaging.onMessage(payload => {
+            console.log("Notification Received:", payload);
+            alert("Notification: " + payload.notification.title);
+        });
+    </script>
+</body>
+</html>
+

@@ -4,14 +4,18 @@ from . import views
 from rest_framework.routers import DefaultRouter
 from .views import ProductViewSet, CategoryViewSet
 from .views import OrderViewSet
-
+from django.views.generic import TemplateView
+from django.urls import re_path
+from django.views.generic import RedirectView
 
 router = DefaultRouter()
 
 router.register(r'categories', CategoryViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'orders', views.OrderViewSet)
+
 urlpatterns = [
+    path('', RedirectView.as_view(url='/admin/', permanent=False)),
     path('login/', views.login_view, name ='login'),
     path('logout/',views.logout_view, name='logout'),
     path('get_user/', views.get_user, name='get_user'),
@@ -41,6 +45,16 @@ urlpatterns = [
     path('download_excel/', views.download_excel, name='download_excel'),
     path('upload_excel/', views.upload_excel, name='upload_excel'),
     #testing
-    path('test/', views.test, name='test')
+    path('test/', views.test, name='test'),
     
+    path('send_notification/', views.send_notification),
+    path('get_token/', TemplateView.as_view(template_name='get_token.html')),
+        re_path(r'^firebase-messaging-sw.js$', TemplateView.as_view(
+        template_name="firebase-messaging-sw.js",
+        content_type='application/javascript'
+    )),
+
+
+    
+
 ]
