@@ -19,6 +19,7 @@ class CustomUser(User):
             )
         ]
     )
+    expiry_time = models.DateTimeField(null = True, blank = True)
     class Meta:
         pass
 

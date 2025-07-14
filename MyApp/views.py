@@ -858,7 +858,7 @@ def get_users(request):
 from .utils import *
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate('/mnt/c/Users/dipak/Desktop/Company_work/Project1/MyProject/MyApp/firebase_key.json')
+    cred = credentials.Certificate('/home/cspl/Company_work/Project1/MyProject/MyApp/firebase_key.json')
     firebase_admin.initialize_app(cred)
 
 
@@ -866,16 +866,16 @@ def send_notification(request):
     if request.method == 'GET':
         print(f"Notification requested at: {time.time()}")
 
-        #registration_token = "cwyc-qKqkucyvBdKClJNkL:APA91bGkNJOtLw94BRfTfKmO2WjP8ck4vAainvJzGfy-YMjVipKP5Dm5B-aJdHNcK1M1WKk_ufOeK0Qdung559ZWwqNAe-qRdryoMoP5uBONMZ8t6Cp_JFg"
-        android_token = "e-GStZFHizecrWnkAR0xs3:APA91bESeIXqPXLxy0imMZ3uA_XH7ghybb93wrEJYC-ensumSkoPCE4AG2K0WQGlYnHqPDV2AA1seluNKNucaAc5rIbKPDlbuLcu0sTV4W5bbiTrd1dqlCw"
-        send_firebase_notification(android_token)
+        registration_token = "c2UEf_00tI2ntlOg_ECcSK:APA91bFVqnI0w2oiseaItLA1L_og_kHz50c-_VXafGVXEZwGmUV6iOh6HyfEPVqK6wJMnpqGiq9A8jQlwL020VOP-KWyGywqCZ61s4r4LUtIzSk2jpqiBCY"
+        #android_token = "e-GStZFHizecrWnkAR0xs3:APA91bESeIXqPXLxy0imMZ3uA_XH7ghybb93wrEJYC-ensumSkoPCE4AG2K0WQGlYnHqPDV2AA1seluNKNucaAc5rIbKPDlbuLcu0sTV4W5bbiTrd1dqlCw"
+        send_firebase_notification(registration_token)
 
         message = messaging.Message(
             notification=messaging.Notification(
                 title="Hello from Firebase",
-                body=f"Your token: {android_token[:10]}...",  
+                body=f"Your token: {registration_token[:10]}...",  
             ),
-            token=android_token,
+            token=registration_token,
         )
 
         try:

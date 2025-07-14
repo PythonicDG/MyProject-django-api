@@ -3,7 +3,7 @@ import requests
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request
 
-SERVICE_ACCOUNT_FILE = '/mnt/c/Users/dipak/Desktop/Company_work/Project1/MyProject/MyApp/firebase_key.json'
+SERVICE_ACCOUNT_FILE = '/home/cspl/Company_work/Project1/MyProject/MyApp/firebase_key.json'
 SCOPES = ["https://www.googleapis.com/auth/firebase.messaging"]
 projectId = "drf-project-4e879"
 
